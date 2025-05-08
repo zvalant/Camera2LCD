@@ -1,0 +1,7 @@
+../Core/Src/main.c:66:19:OV5640_WriteReg	1
+../Core/Src/main.c:76:19:OV5640_ReadReg	2
+../Core/Src/main.c:92:19:OV5640_TestConnection	3
+../Core/Src/main.c:110:6:OV5640_TurnOnSequence	1
+../Core/Src/main.c:126:5:main	2
+../Core/Src/main.c:202:6:SystemClock_Config	4
+../Core/Src/main.c:266:6:Error_Handler	1

@@ -1,0 +1,7 @@
+../Core/Src/main.c:66:19:OV5640_WriteReg	32	static
+../Core/Src/main.c:76:19:OV5640_ReadReg	112	static
+../Core/Src/main.c:92:19:OV5640_TestConnection	16	static
+../Core/Src/main.c:110:6:OV5640_TurnOnSequence	8	static
+../Core/Src/main.c:126:5:main	32	static
+../Core/Src/main.c:202:6:SystemClock_Config	120	static
+../Core/Src/main.c:266:6:Error_Handler	4	static,ignoring_inline_asm
