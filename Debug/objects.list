@@ -1,3 +1,4 @@
+"./Core/Src/OV5640.o"
 "./Core/Src/dcmi.o"
 "./Core/Src/eth.o"
 "./Core/Src/gpio.o"
