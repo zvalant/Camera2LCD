@@ -1,4 +1,7 @@
-../Core/Src/OV5640.c:28:19:OV5640_WriteReg	32	static
-../Core/Src/OV5640.c:39:19:OV5640_ReadReg	112	static
-../Core/Src/OV5640.c:57:19:OV5640_TestConnection	16	static
-../Core/Src/OV5640.c:72:6:OV5640_PowerUpSequence	8	static
+../Core/Src/OV5640.c:48:19:OV5640_WriteReg	32	static
+../Core/Src/OV5640.c:59:19:OV5640_ReadReg	112	static
+../Core/Src/OV5640.c:77:19:OV5640_TestConnection	16	static
+../Core/Src/OV5640.c:92:6:OV5640_PowerUpSequence	8	static
+../Core/Src/OV5640.c:102:19:OV5640_SetResolution	24	static
+../Core/Src/OV5640.c:112:19:OV5640_SetFormat	24	static
+../Core/Src/OV5640.c:120:6:OV5640_ConfigureCamera	16	static

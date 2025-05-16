@@ -20,7 +20,7 @@
 #define OV5640_REG_OUT_HEIGHT_L 0x380B
 
 typedef enum {
-	OV5640_RES_240X320,
+	OV5640_RES_240X360,
 	OV5640_RES_480X640,
 	OV5640_RES_720X1080
 } OV5640_Resolution;
@@ -28,7 +28,8 @@ typedef enum {
 typedef enum {
 	OV5640_FORMAT_RGB565,
 	OV5640_FORMAT_YUV422,
-	OV5640_FORMAT_JPEG
+	OV5640_FORMAT_JPEG,
+	OV5640_FORMAT_RAW
 }OV5640_Format;
 
 
@@ -38,7 +39,10 @@ typedef enum {
 HAL_StatusTypeDef OV5640_WriteReg(uint16_t regAddr, uint8_t data);
 HAL_StatusTypeDef OV5640_ReadReg(uint16_t regAddr, uint8_t *dataPtr);
 HAL_StatusTypeDef OV5640_TestConnection(void);
+HAL_StatusTypeDef OV5640_SetResolution(OV5640_Resolution selectedResolution);
+HAL_StatusTypeDef OV5640_SetPixelFormat(OV5640_Format selectedFormat);
 void OV5640_PowerUpSequence(void);
+void OV5640_ConfigureCamera(void);
 
 
 

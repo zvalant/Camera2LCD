@@ -40,7 +40,7 @@ Core/Src/OV5640.o: ../Core/Src/OV5640.c ../Core/Inc/i2c.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_usb.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pcd_ex.h \
  ../Core/Inc/gpio.h ../Core/Inc/tim.h ../Core/Inc/usart.h \
- ../Core/Inc/dcmi.h
+ ../Core/Inc/dcmi.h ../Core/Inc/OV5640.h
 ../Core/Inc/i2c.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h:
@@ -87,3 +87,4 @@ Core/Src/OV5640.o: ../Core/Src/OV5640.c ../Core/Inc/i2c.h \
 ../Core/Inc/tim.h:
 ../Core/Inc/usart.h:
 ../Core/Inc/dcmi.h:
+../Core/Inc/OV5640.h:

@@ -108,14 +108,7 @@ int main(void) {
 	/* USER CODE BEGIN 2 */
 
 	OV5640_PowerUpSequence();
-	if (OV5640_TestConnection() == HAL_OK) {
-		HAL_GPIO_WritePin(I2C_SUCCESS_GPIO_Port, I2C_SUCCESS_Pin, GPIO_PIN_SET);
-		HAL_Delay(1000);
-		HAL_GPIO_WritePin(I2C_SUCCESS_GPIO_Port, I2C_SUCCESS_Pin,
-				GPIO_PIN_RESET);
-		HAL_Delay(500);
-
-	}
+	OV5640_ConfigureCamera();
 	uint8_t result;
 	//write format for format control register to make format rgb565
 
