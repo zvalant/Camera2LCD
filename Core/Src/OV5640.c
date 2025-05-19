@@ -13,6 +13,7 @@
 #include "dcmi.h"
 #include "stm32h7xx_hal.h"
 #include "stm32h7xx_hal_i2c.h"
+#include "stm32h7xx_hal_dcmi.h"
 //Project Header Files
 #include "OV5640.h"
 //Project Defines
@@ -31,19 +32,28 @@ static const struct {
 	uint16_t height;
 
 }OV5640_Resolutions[] = {
-		[OV5640_RES_240X360] = {240, 360},
+		[OV5640_RES_240X320] = {240, 320},
 		[OV5640_RES_480X640] = {480, 640},
 		[OV5640_RES_720X1080] = {720, 1080}
 };
 //Format table
-static const OV5640_Formats[] = {
-		[OV5640_FORMAT_RGB565] = 0x61,
-		[OV5640_FORMAT_YUV422] = 0X1F,
-		[OV5640_FORMAT_JPEG] = 0X01,
-		[OV5640_FORMAT_RAW] = 0X03//rg/gb
+static const struct {
+	uint16_t formatValue;
+	uint16_t bytesPerPixel;
+
+}OV5640_Formats[] = {
+		[OV5640_FORMAT_RGB565] = {0x61,2},
+		[OV5640_FORMAT_YUV422] = {0X1F,2},
+		[OV5640_FORMAT_JPEG] = {0X01,1},
+		[OV5640_FORMAT_RAW] = {0X03,2}//rg/gb
 };
 
+OV5640_CameraConfig activeCameraConfig = {
+		OV5640_RES_240X320,
+		OV5640_FORMAT_RGB565
+};
 
+OV5640_CameraConfig* activeCameraConfigPtr = &activeCameraConfig;
 
 HAL_StatusTypeDef OV5640_WriteReg(uint16_t regAddr, uint8_t data) {
 	uint8_t transmitData[3];
@@ -89,7 +99,7 @@ HAL_StatusTypeDef OV5640_TestConnection(void) {
 
 	return HAL_OK;
 }
-void OV5640_PowerUpSequence(void) {
+HAL_StatusTypeDef OV5640_PowerUpSequence(void) {
 	HAL_Delay(10);
 	HAL_GPIO_WritePin(CAMERA_PWDN_GPIO_Port, CAMERA_PWDN_Pin, GPIO_PIN_RESET);
 	HAL_Delay(5);
@@ -97,45 +107,79 @@ void OV5640_PowerUpSequence(void) {
 	HAL_Delay(20);
 	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
 	HAL_Delay(5);
+	HAL_StatusTypeDef status = OV5640_ConfigureCamera();
+	return status;
 
 }
-HAL_StatusTypeDef OV5640_SetResolution(OV5640_Resolution selectedResolution){
+HAL_StatusTypeDef OV5640_SetResolution(void){
 	HAL_StatusTypeDef status = HAL_OK;
-	const uint16_t selectedWidth = OV5640_Resolutions[selectedResolution].width;
-	const uint16_t selectedHeight = OV5640_Resolutions[selectedResolution].height;
-	status | OV5640_WriteReg(OV5640_REG_OUT_WIDTH_H, selectedWidth>>8);
-	status | OV5640_WriteReg(OV5640_REG_OUT_WIDTH_L, selectedWidth&0xFF);
-	status | OV5640_WriteReg(OV5640_REG_OUT_HEIGHT_H, selectedHeight>>8);
-	status | OV5640_WriteReg(OV5640_REG_OUT_HEIGHT_L, selectedHeight&0xFF);
+	const uint16_t selectedWidth =OV5640_Resolutions[activeCameraConfigPtr->resolution].width;
+	const uint16_t selectedHeight = OV5640_Resolutions[activeCameraConfigPtr->resolution].height;
+	status |= OV5640_WriteReg(OV5640_REG_OUT_WIDTH_H, selectedWidth>>8);
+	status |= OV5640_WriteReg(OV5640_REG_OUT_WIDTH_L, selectedWidth&0xFF);
+	status |= OV5640_WriteReg(OV5640_REG_OUT_HEIGHT_H, selectedHeight>>8);
+	status |= OV5640_WriteReg(OV5640_REG_OUT_HEIGHT_L, selectedHeight&0xFF);
 	return status;
 }
-HAL_StatusTypeDef OV5640_SetFormat(OV5640_Format selectedFormat){
+HAL_StatusTypeDef OV5640_SetFormat(void){
 	HAL_StatusTypeDef status = HAL_OK;
-	uint8_t formatData= OV5640_Formats[selectedFormat];
+	uint8_t formatData= OV5640_Formats[activeCameraConfigPtr->pixelFormat].formatValue;
 	status | OV5640_WriteReg(OV5640_REG_FORMAT_CTRL, formatData);
 	return status;
 
 
 }
-void OV5640_ConfigureCamera(void){
+HAL_StatusTypeDef OV5640_ConfigureCamera(void){
 	HAL_StatusTypeDef status = HAL_OK;
-	if (OV5640_TestConnection != HAL_OK){
-		return;
-	}
+	uint8_t resetValue = 0x0;
 
-	status | OV5640_SetResolution(OV5640_RES_240X360);
-	status | OV5640_SetFormat(OV5640_FORMAT_RGB565);
-	if (status!= HAL_OK){
-		return;
-	}
+	OV5640_ReadReg(OV5640_SOFTWARE_RESET, &resetValue);
+	resetValue |=0x80;
+	OV5640_WriteReg(OV5640_SOFTWARE_RESET, resetValue);
+	HAL_Delay(10);
+	resetValue &= ~0x80;
+	OV5640_WriteReg(OV5640_SOFTWARE_RESET, resetValue);
+	HAL_Delay(100);
 
-	HAL_GPIO_WritePin(I2C_SUCCESS_GPIO_Port, I2C_SUCCESS_Pin, GPIO_PIN_SET);
-	HAL_Delay(1000);
-	HAL_GPIO_WritePin(I2C_SUCCESS_GPIO_Port, I2C_SUCCESS_Pin,
-			GPIO_PIN_RESET);
-	HAL_Delay(500);
-	return;
+	status |= OV5640_SetResolution();
+	status |= OV5640_SetFormat();
+	uint8_t result;
+	//write format for format control register to make format rgb565
+
+	OV5640_ReadReg(OV5640_REG_FORMAT_CTRL, &result);
+	char buff3[20];
+	sprintf(buff3, "result of format: %d\n\r", result);
+	HAL_UART_Transmit(&huart3, buff3, strlen(buff3), HAL_MAX_DELAY);
+	return status;
 
 
 
 }
+void frameCapture(void){
+
+	uint16_t width = OV5640_Resolutions[activeCameraConfigPtr->resolution].width;
+	uint16_t height = OV5640_Resolutions[activeCameraConfigPtr->resolution].height;
+	uint8_t pixelSize = OV5640_Formats[activeCameraConfigPtr->pixelFormat].bytesPerPixel;
+
+	uint8_t frame[width*height*pixelSize];
+    uint32_t timeout = HAL_MAX_DELAY;
+    char testBuff[10] = "In Frame\n\r";
+    HAL_UART_Transmit(&huart3, testBuff, strlen(testBuff), HAL_MAX_DELAY);
+	DCMI->CR |=DCMI_CR_ENABLE;
+	DCMI->CR |=DCMI_CR_CM;
+	DCMI->CR |= DCMI_CR_CAPTURE;
+	if (DCMI->RISR & 0x01<<0){
+		uint32_t pixel = DCMI->DR;
+		char buffFrame[20];
+		sprintf(buffFrame, "Start of image: %d,\n\r", pixel);
+		HAL_UART_Transmit(&huart3, buffFrame, strlen(buffFrame),HAL_MAX_DELAY);
+	}
+
+}
+
+
+
+
+
+
+
