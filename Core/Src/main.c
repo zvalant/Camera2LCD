@@ -102,14 +102,20 @@ int main(void)
   MX_ETH_Init();
   MX_USB_OTG_FS_PCD_Init();
   MX_DCMI_Init();
-  MX_I2C1_Init();
-  MX_SPI1_Init();
   MX_TIM1_Init();
   MX_TIM4_Init();
+  MX_I2C1_Init();
+  MX_SPI1_Init();
+
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
 
   HAL_StatusTypeDef cameraConfigStatus = OV5640_PowerUpSequence();
+  uint8_t reg1 = 0;
+  OV5640_ReadReg(OV5640_POLARITY_CTRL,&reg1);
+  char buffReg1[20];
+  sprintf(buffReg1, "chipID1: %d\r\n", reg1);
+  HAL_UART_Transmit(&huart3, buffReg1, strlen(buffReg1), HAL_MAX_DELAY);
 	if (cameraConfigStatus == HAL_OK){
 		HAL_GPIO_WritePin(I2C_SUCCESS_GPIO_Port, I2C_SUCCESS_Pin, GPIO_PIN_SET);
 		HAL_Delay(1000);
@@ -118,6 +124,9 @@ int main(void)
 	}
 
 	frameCapture();
+	char buffFrame[20];
+	sprintf(buffFrame, "Start of image: %d,\n\r", DCMI->DR);
+	HAL_UART_Transmit(&huart3, buffFrame, strlen(buffFrame),HAL_MAX_DELAY);
 
   /* USER CODE END 2 */
 

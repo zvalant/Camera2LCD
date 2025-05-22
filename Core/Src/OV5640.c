@@ -17,10 +17,12 @@
 //Project Header Files
 #include "OV5640.h"
 //Project Defines
-#define OV5640_I2C_ADDR (0x78)
+#define OV5640_I2C_ADDR_W (0x78)
+#define OV5640_I2C_ADDR_R (0x79)
 #define OV5640_RES_WIDTH 240
 #define OV5640_RES_HEIGHT 360
 #define OV5640_PIXEL_FORMAT 0x61//0x6 is rgb565 0x1 is R first
+#define OV5640_POLARITY 0X23
 
 //Project consts
 
@@ -56,32 +58,18 @@ OV5640_CameraConfig activeCameraConfig = {
 OV5640_CameraConfig* activeCameraConfigPtr = &activeCameraConfig;
 
 HAL_StatusTypeDef OV5640_WriteReg(uint16_t regAddr, uint8_t data) {
-	uint8_t transmitData[3];
-	transmitData[0] = (regAddr >> 8);
-	transmitData[1] = regAddr & 0xFF;
-	transmitData[2] = data;
 
-	return HAL_I2C_Master_Transmit(&hi2c1, OV5640_I2C_ADDR, transmitData, 3,
-			HAL_MAX_DELAY);
+
+	return HAL_I2C_Mem_Write(&hi2c1, OV5640_I2C_ADDR_W, regAddr,
+			I2C_MEMADD_SIZE_16BIT,&data,1,HAL_MAX_DELAY);
 
 }
 
 HAL_StatusTypeDef OV5640_ReadReg(uint16_t regAddr, uint8_t *dataPtr) {
 	char buff[25] = "readStart\r\n";
 	HAL_UART_Transmit(&huart3, &buff, sizeof(buff), HAL_MAX_DELAY);
-	uint8_t transmitData[2];
-	transmitData[0] = (regAddr >> 8);
-	transmitData[1] = regAddr & 0xFF;
-	HAL_StatusTypeDef status = HAL_I2C_Master_Transmit(&hi2c1, OV5640_I2C_ADDR,
-			transmitData, 2, HAL_MAX_DELAY);
-	char buffStatus[50];
-	sprintf(buffStatus, "transmit Status: %d \r\n", status);
-	HAL_UART_Transmit(&huart3, buffStatus, strlen(buffStatus), HAL_MAX_DELAY);
-	if (status != HAL_OK) {
-		return status;
-	}
-	return HAL_I2C_Master_Receive(&hi2c1, OV5640_I2C_ADDR, dataPtr, 1,
-			HAL_MAX_DELAY);
+	return HAL_I2C_Mem_Read(&hi2c1, OV5640_I2C_ADDR_R, regAddr,
+			I2C_MEMADD_SIZE_16BIT, dataPtr, 1, HAL_MAX_DELAY);
 }
 
 HAL_StatusTypeDef OV5640_TestConnection(void) {
@@ -115,10 +103,10 @@ HAL_StatusTypeDef OV5640_SetResolution(void){
 	HAL_StatusTypeDef status = HAL_OK;
 	const uint16_t selectedWidth =OV5640_Resolutions[activeCameraConfigPtr->resolution].width;
 	const uint16_t selectedHeight = OV5640_Resolutions[activeCameraConfigPtr->resolution].height;
-	status |= OV5640_WriteReg(OV5640_REG_OUT_WIDTH_H, selectedWidth>>8);
-	status |= OV5640_WriteReg(OV5640_REG_OUT_WIDTH_L, selectedWidth&0xFF);
-	status |= OV5640_WriteReg(OV5640_REG_OUT_HEIGHT_H, selectedHeight>>8);
-	status |= OV5640_WriteReg(OV5640_REG_OUT_HEIGHT_L, selectedHeight&0xFF);
+	status |= OV5640_WriteReg(OV5640_REG_OUT_WIDTH_H, (uint8_t)selectedWidth>>8);
+	status |= OV5640_WriteReg(OV5640_REG_OUT_WIDTH_L, (uint8_t)selectedWidth&0xFF);
+	status |= OV5640_WriteReg(OV5640_REG_OUT_HEIGHT_H, (uint8_t)selectedHeight>>8);
+	status |= OV5640_WriteReg(OV5640_REG_OUT_HEIGHT_L, (uint8_t)selectedHeight&0xFF);
 	return status;
 }
 HAL_StatusTypeDef OV5640_SetFormat(void){
@@ -143,19 +131,34 @@ HAL_StatusTypeDef OV5640_ConfigureCamera(void){
 
 	status |= OV5640_SetResolution();
 	status |= OV5640_SetFormat();
-	uint8_t result;
-	//write format for format control register to make format rgb565
 
-	OV5640_ReadReg(OV5640_REG_FORMAT_CTRL, &result);
+	status |= OV5640_WriteReg(OV5640_POLARITY_CTRL, OV5640_POLARITY);
+	uint8_t pol1;
+	OV5640_ReadReg(OV5640_POLARITY_CTRL, &pol1);
+	char buff2[20];
+	sprintf(buff2, "result of value: %d\n\r", pol1);
+	HAL_UART_Transmit(&huart3, buff2, strlen(buff2), HAL_MAX_DELAY);
+	OV5640_WriteReg(0x503D, 0x80);
+	HAL_Delay(10);
+	volatile uint8_t result = 0;
+	//write format for format control register to make format rgb565
 	char buff3[20];
+	OV5640_ReadReg(OV5640_REG_FORMAT_CTRL, &result);
 	sprintf(buff3, "result of format: %d\n\r", result);
 	HAL_UART_Transmit(&huart3, buff3, strlen(buff3), HAL_MAX_DELAY);
+	uint8_t result1 = 0;
+	OV5640_ReadReg(OV5640_REG_CHIP_ID_L, &result1);
+	char buff4[20];
+	sprintf(buff4, "test format: %d\n\r", result1);
+
+	HAL_UART_Transmit(&huart3, buff4, strlen(buff4), HAL_MAX_DELAY);
 	return status;
 
 
 
 }
 void frameCapture(void){
+	__HAL_RCC_DCMI_CLK_ENABLE();
 
 	uint16_t width = OV5640_Resolutions[activeCameraConfigPtr->resolution].width;
 	uint16_t height = OV5640_Resolutions[activeCameraConfigPtr->resolution].height;
@@ -168,11 +171,14 @@ void frameCapture(void){
 	DCMI->CR |=DCMI_CR_ENABLE;
 	DCMI->CR |=DCMI_CR_CM;
 	DCMI->CR |= DCMI_CR_CAPTURE;
-	if (DCMI->RISR & 0x01<<0){
-		uint32_t pixel = DCMI->DR;
+	for (int i = 0; i<sizeof(frame);i++){
+	    frame[i] = DCMI->DR;
 		char buffFrame[20];
-		sprintf(buffFrame, "Start of image: %d,\n\r", pixel);
-		HAL_UART_Transmit(&huart3, buffFrame, strlen(buffFrame),HAL_MAX_DELAY);
+		if (i==0){
+			sprintf(buffFrame, "Start of image: %d,\n\r", DCMI->DR);
+			HAL_UART_Transmit(&huart3, buffFrame, strlen(buffFrame),HAL_MAX_DELAY);
+		}
+
 	}
 
 }
