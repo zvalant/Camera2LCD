@@ -22,7 +22,7 @@
 #define OV5640_RES_WIDTH 240
 #define OV5640_RES_HEIGHT 360
 #define OV5640_PIXEL_FORMAT 0x61//0x6 is rgb565 0x1 is R first
-#define OV5640_POLARITY 0X23
+#define OV5640_POLARITY 0x23
 
 //Project consts
 
@@ -147,7 +147,7 @@ HAL_StatusTypeDef OV5640_ConfigureCamera(void){
 	sprintf(buff3, "result of format: %d\n\r", result);
 	HAL_UART_Transmit(&huart3, buff3, strlen(buff3), HAL_MAX_DELAY);
 	uint8_t result1 = 0;
-	OV5640_ReadReg(OV5640_REG_CHIP_ID_L, &result1);
+	OV5640_ReadReg(OV5640_REG_OUT_WIDTH_L, &result1);
 	char buff4[20];
 	sprintf(buff4, "test format: %d\n\r", result1);
 
