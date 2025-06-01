@@ -1,8 +1,8 @@
-../Core/Src/OV5640.c:60:19:OV5640_WriteReg	1
-../Core/Src/OV5640.c:68:19:OV5640_ReadReg	1
-../Core/Src/OV5640.c:75:19:OV5640_TestConnection	3
-../Core/Src/OV5640.c:90:19:OV5640_PowerUpSequence	1
-../Core/Src/OV5640.c:102:19:OV5640_SetResolution	1
-../Core/Src/OV5640.c:112:19:OV5640_SetFormat	1
-../Core/Src/OV5640.c:120:19:OV5640_ConfigureCamera	1
-../Core/Src/OV5640.c:160:6:frameCapture	3
+../Core/Src/OV5640.c:57:19:OV5640_WriteReg	1
+../Core/Src/OV5640.c:66:19:OV5640_ReadReg	1
+../Core/Src/OV5640.c:73:19:OV5640_TestConnection	3
+../Core/Src/OV5640.c:88:19:OV5640_PowerUpSequence	1
+../Core/Src/OV5640.c:100:19:OV5640_SetResolution	1
+../Core/Src/OV5640.c:111:19:OV5640_SetFormat	1
+../Core/Src/OV5640.c:119:19:OV5640_ConfigureCamera	1
+../Core/Src/OV5640.c:171:6:frameCapture	6

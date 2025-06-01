@@ -1,6 +1,6 @@
 ################################################################################
 # Automatically-generated file. Do not edit!
-# Toolchain: GNU Tools for STM32 (13.3.rel1)
+# Toolchain: GNU Tools for STM32 (12.3.rel1)
 ################################################################################
 
 -include ../makefile.init
@@ -60,8 +60,8 @@ all: main-build
 main-build: Camera2LCD.elf secondary-outputs
 
 # Tool invocations
-Camera2LCD.elf Camera2LCD.map: $(OBJS) $(USER_OBJS) C:\Users\zacv\STM32CubeIDE\host\Camera2LCD\STM32H753ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Camera2LCD.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"C:\Users\zacv\STM32CubeIDE\host\Camera2LCD\STM32H753ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Camera2LCD.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Camera2LCD.elf Camera2LCD.map: $(OBJS) $(USER_OBJS) C:\Users\zac23\OneDrive\Documents\Embedded-C\My_workspace\host\Camera2LCD\STM32H753ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "Camera2LCD.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"C:\Users\zac23\OneDrive\Documents\Embedded-C\My_workspace\host\Camera2LCD\STM32H753ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Camera2LCD.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
