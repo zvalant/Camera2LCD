@@ -144,7 +144,7 @@ HAL_StatusTypeDef OV5640_ConfigureCamera(void){
 	char buff2[20];
 	sprintf(buff2, "format: : %d\n\r", pol1);
 	HAL_UART_Transmit(&huart3, buff2, strlen(buff2), HAL_MAX_DELAY);
-	OV5640_WriteReg(0x503D, 0x80);
+	OV5640_WriteReg(0x503D, 0x00);
 	HAL_Delay(10);
 	uint16_t result = 0;
 	uint8_t resultL = 0;
@@ -190,7 +190,7 @@ void frameCapture(void){
 	DCMI->CR |= DCMI_CR_CAPTURE;
 
 	// Read some pixels when FIFO has data
-	for(int i = 0; i < 10 && i < sizeof(frameBuffer)/4; i++) {
+	for(int i = 0; i < sizeof(frameBuffer)/4; i++) {
 		// Wait for data to be available
 		while(!(DCMI->SR & DCMI_SR_FNE));  // FIFO not empty
 		frameBuffer[i] = DCMI->DR;

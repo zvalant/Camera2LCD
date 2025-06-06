@@ -124,7 +124,7 @@ int main(void)
 
 	frameCapture();
 	char buffFrame[20];
-	sprintf(buffFrame, "Start of image: %d,\n\r", DCMI->DR);
+	sprintf(buffFrame, "Start of image: 0x%08lX,\n\r", DCMI->DR);
 	HAL_UART_Transmit(&huart3, buffFrame, strlen(buffFrame),HAL_MAX_DELAY);
 
   /* USER CODE END 2 */
