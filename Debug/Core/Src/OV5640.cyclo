@@ -5,4 +5,4 @@
 ../Core/Src/OV5640.c:100:19:OV5640_SetResolution	1
 ../Core/Src/OV5640.c:111:19:OV5640_SetFormat	1
 ../Core/Src/OV5640.c:119:19:OV5640_ConfigureCamera	1
-../Core/Src/OV5640.c:171:6:frameCapture	5
+../Core/Src/OV5640.c:171:6:frameCapture	10

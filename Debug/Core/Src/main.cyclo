@@ -1,3 +1,12 @@
-../Core/Src/main.c:77:5:main	2
-../Core/Src/main.c:147:6:SystemClock_Config	4
-../Core/Src/main.c:211:6:Error_Handler	1
+../Core/Src/main.c:67:6:ILI9341_SendCommand	1
+../Core/Src/main.c:75:6:ILI9341_SendData	1
+../Core/Src/main.c:82:6:LCDBlink_Test	1
+../Core/Src/main.c:95:6:ILI9341_Init	1
+../Core/Src/main.c:126:6:ILI9341_FillScreen	2
+../Core/Src/main.c:154:6:ILI9341_Init_Complete	1
+../Core/Src/main.c:259:6:ILI9341_TestDisplay	1
+../Core/Src/main.c:271:6:TestSPIBasic	1
+../Core/Src/main.c:286:6:TestGPIOPins	2
+../Core/Src/main.c:316:5:main	2
+../Core/Src/main.c:392:6:SystemClock_Config	4
+../Core/Src/main.c:457:6:Error_Handler	1

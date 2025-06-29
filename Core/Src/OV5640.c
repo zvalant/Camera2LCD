@@ -171,36 +171,38 @@ HAL_StatusTypeDef OV5640_ConfigureCamera(void){
 void frameCapture(void){
 	__HAL_RCC_DCMI_CLK_ENABLE();
 
-	uint16_t width = OV5640_Resolutions[activeCameraConfigPtr->resolution].width;
-	uint16_t height = OV5640_Resolutions[activeCameraConfigPtr->resolution].height;
-	uint8_t pixelSize = OV5640_Formats[activeCameraConfigPtr->pixelFormat].bytesPerPixel;
+	const uint16_t width = OV5640_Resolutions[activeCameraConfigPtr->resolution].width;
+	const uint16_t height = OV5640_Resolutions[activeCameraConfigPtr->resolution].height;
+	const uint8_t pixelSize = OV5640_Formats[activeCameraConfigPtr->pixelFormat].bytesPerPixel;
 
-	static uint32_t frameBuffer[240*320/2];
 
-	// Enable DCMI
-	DCMI->CR |= DCMI_CR_ENABLE;
+	uint32_t frameBuffer[width*height/2];
 
-	// Wait for VSYNC to go high (start of frame)
-	while(!(DCMI->SR & DCMI_SR_VSYNC));
 
-	// Wait for VSYNC to go low (active frame period)
-	while(DCMI->SR & DCMI_SR_VSYNC);
 
-	// Now capture data during active frame
-	DCMI->CR |= DCMI_CR_CAPTURE;
 
-	// Read some pixels when FIFO has data
-	for(int i = 0; i < sizeof(frameBuffer)/4; i++) {
-		// Wait for data to be available
-		while(!(DCMI->SR & DCMI_SR_FNE));  // FIFO not empty
-		frameBuffer[i] = DCMI->DR;
+	HAL_UART_Transmit(&huart3, "STARTING DMA Capture\r\n", 25, HAL_MAX_DELAY);
 
-		char pixelBuff[30];
-		sprintf(pixelBuff, "Pixel %d: 0x%08lX\n\r", i, frameBuffer[i]);
+	HAL_StatusTypeDef status = HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_SNAPSHOT, (uint32_t) frameBuffer, (width*height)/2);
+
+	if (status!=HAL_OK){
+		char errorBuff[40];
+		sprintf(errorBuff, "DMA START ERROR: %d\r\n", status);
+		HAL_UART_Transmit(&huart3, errorBuff, strlen(errorBuff), HAL_MAX_DELAY);
+		return;
+	}
+	HAL_Delay(500);
+
+	for (int i= 0; i<10 && sizeof(frameBuffer); i++){
+		char pixelBuff[40];
+		sprintf(pixelBuff, "DMA Pixel %d 0x%lX\r\n", i, frameBuffer[i]);
 		HAL_UART_Transmit(&huart3, pixelBuff, strlen(pixelBuff), HAL_MAX_DELAY);
+
 	}
 
 }
+
+
 
 
 
